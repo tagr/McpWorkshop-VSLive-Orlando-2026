@@ -58,20 +58,11 @@ public class BookingService(
         string? userId,
         CancellationToken cancellationToken)
     {
-        // Load the booking an earlier confirm may have created, so the domain can hand it back.
-        var hold = await db.SeatHolds
-            .Include(h => h.ConfirmedAsBooking)
-            .FirstOrDefaultAsync(h => h.Id == holdId, cancellationToken)
+        var hold = await db.SeatHolds.FirstOrDefaultAsync(h => h.Id == holdId, cancellationToken)
             ?? throw new BookingDomainException($"Hold {holdId} not found.");
 
         var now = clock.GetUtcNow().UtcDateTime;
-        var result = hold.Confirm(userId, now, BookingReference.Generate());
-        var booking = result.Booking;
-        if (!result.Created)
-        {
-            return booking;
-        }
-
+        var booking = hold.Confirm(userId, now, BookingReference.Generate()).Booking;
         db.Bookings.Add(booking);
 
         for (int attempt = 1; attempt <= BookingReferenceRetryAttempts; attempt++)

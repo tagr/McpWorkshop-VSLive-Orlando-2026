@@ -134,13 +134,6 @@ public class Flight
         var activeHold = occupancy.Holds.FirstOrDefault(h => h.SeatNumber == seatNumber && h.IsActive(nowUtc));
         if (activeHold is not null)
         {
-            // Idempotency: the same caller re-requesting the same seat gets the same hold
-            // back, instead of a conflict. Retries become safe.
-            if (activeHold.IsOwnedBy(userId))
-            {
-                return new HoldSeatResult(activeHold, Created: false);
-            }
-
             throw new BookingDomainException($"Seat {seatNumber} is currently held.");
         }
 

@@ -1,11 +1,9 @@
 using System.ComponentModel;
-using Microsoft.AspNetCore.Authorization;
 using ModelContextProtocol.Server;
 using TravelBooking.Application.Handlers;
 
 namespace TravelBooking.MCP.Tools;
 
-[Authorize]
 [McpServerToolType]
 public class FlightTools(
     SearchFlightsHandler searchFlights,

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Microsoft.AspNetCore.Authorization;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using TravelBooking.MCP.Resources;
@@ -11,7 +10,6 @@ namespace TravelBooking.MCP.Prompts;
 /// drop into a conversation. It only returns messages. It never calls a tool, holds a seat
 /// or creates a booking; the assistant does that, one tool at a time, with the user.
 /// </summary>
-[Authorize]
 [McpServerPromptType]
 public static class BookFlightPrompt
 {

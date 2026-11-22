@@ -10,7 +10,7 @@ public static class FlightEndpoints
 {
     public static IEndpointRouteBuilder MapFlightEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/flights").WithTags("Flights").RequireAuthorization();
+        var group = app.MapGroup("/flights").WithTags("Flights");
 
         group.MapGet("/", async (
             string from,

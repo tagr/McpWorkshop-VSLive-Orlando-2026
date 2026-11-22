@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Microsoft.AspNetCore.Authorization;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
@@ -9,7 +8,6 @@ namespace TravelBooking.MCP.Resources;
 /// The one MCP <em>resource</em> of the workshop server: static reference text a client can
 /// read and hand to the model as context. Tools do things; this just informs.
 /// </summary>
-[Authorize]
 [McpServerResourceType]
 public static class BaggagePolicyResource
 {

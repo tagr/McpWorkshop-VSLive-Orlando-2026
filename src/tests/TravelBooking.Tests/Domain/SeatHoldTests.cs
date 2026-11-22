@@ -87,35 +87,11 @@ public class SeatHoldTests
     public void Confirm_rejects_hold_that_is_not_active()
     {
         var hold = NewHold("alice");
-        hold.MarkExpired(hold.ExpiresAtUtc);
-
-        var act = () => hold.Confirm("alice", Now.AddMinutes(1), "BKG-TEST01");
-
-        act.Should().Throw<BookingDomainException>().WithMessage("*not active*");
-    }
-
-    [Fact]
-    public void Confirm_returns_the_existing_booking_when_the_owner_confirms_again()
-    {
-        var hold = NewHold("alice");
-        var first = hold.Confirm("alice", Now.AddMinutes(1), "BKG-TEST01");
-
-        var retry = hold.Confirm("alice", Now.AddMinutes(2), "BKG-TEST02");
-
-        using var _ = new AssertionScope();
-        retry.Created.Should().BeFalse();
-        retry.Booking.Should().BeSameAs(first.Booking);
-    }
-
-    [Fact]
-    public void Confirm_rejects_a_different_caller_confirming_again()
-    {
-        var hold = NewHold("alice");
         hold.Confirm("alice", Now.AddMinutes(1), "BKG-TEST01");
 
-        var act = () => hold.Confirm("bob", Now.AddMinutes(2), "BKG-TEST02");
+        var act = () => hold.Confirm("alice", Now.AddMinutes(2), "BKG-TEST02");
 
-        act.Should().Throw<BookingDomainException>().WithMessage("Only the owner may confirm this hold.");
+        act.Should().Throw<BookingDomainException>().WithMessage("*not active*");
     }
 
     [Fact]

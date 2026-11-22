@@ -25,8 +25,7 @@ internal static class HostBootstrap
             {
                 await seeder.ResetTransactionalDataAsync(ct);
                 return Results.Ok(new { status = "reset", clearedTables = new[] { "bookings", "seat_holds", "audit_entries" } });
-            })
-            .RequireAuthorization("CanBook");
+            });
         }
     }
 

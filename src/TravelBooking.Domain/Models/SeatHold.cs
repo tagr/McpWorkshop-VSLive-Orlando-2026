@@ -42,14 +42,6 @@ public class SeatHold
 
     public ConfirmResult Confirm(string? userId, DateTime nowUtc, string bookingReference)
     {
-        // Idempotency: the owner confirming an already-confirmed hold gets the booking that
-        // confirmation created, instead of a conflict. Retries become safe.
-        if (Status == HoldStatus.Confirmed && ConfirmedAsBooking is not null)
-        {
-            OwnershipRule.EnsurePermits(UserId, userId, "confirm this hold");
-            return new ConfirmResult(ConfirmedAsBooking, Created: false);
-        }
-
         if (Status != HoldStatus.Active)
         {
             throw new BookingDomainException($"Hold {Id} is not active (status: {Status}).");

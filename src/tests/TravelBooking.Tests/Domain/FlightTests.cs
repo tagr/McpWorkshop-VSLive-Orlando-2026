@@ -275,17 +275,4 @@ public class FlightTests
 
         flight.AvailableSeats(FlightOccupancy.Empty, Dep).Should().BeEmpty();
     }
-
-    [Fact]
-    public void HoldSeat_returns_existing_hold_for_same_named_caller()
-    {
-        var flight = NewFlight();
-        var first = flight.HoldSeat("1A", "alice", Now, Policy, FlightOccupancy.Empty).Hold;
-
-        var retry = flight.HoldSeat("1A", "alice", Now, Policy, new FlightOccupancy([first], []));
-
-        using var _ = new AssertionScope();
-        retry.Created.Should().BeFalse();
-        retry.Hold.Should().BeSameAs(first);
-    }
 }

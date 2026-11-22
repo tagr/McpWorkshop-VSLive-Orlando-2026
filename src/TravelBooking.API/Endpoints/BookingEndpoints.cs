@@ -14,7 +14,7 @@ public static class BookingEndpoints
 
     public static IEndpointRouteBuilder MapBookingEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/bookings").WithTags("Bookings").RequireAuthorization();
+        var group = app.MapGroup("/bookings").WithTags("Bookings");
 
         group.MapPost("/hold", async (
             HoldSeatRequest request,
@@ -24,8 +24,7 @@ public static class BookingEndpoints
         {
             var hold = await handler.HandleAsync(request.FlightId, request.SeatNumber, user.GetUserId(), ct);
             return Results.Ok(hold);
-        })
-        .RequireAuthorization(CanBookPolicy);
+        });
 
         group.MapPost("/confirm", async (
             ConfirmBookingRequest request,
@@ -35,8 +34,7 @@ public static class BookingEndpoints
         {
             var booking = await handler.HandleAsync(request.HoldId, user.GetUserId(), ct);
             return Results.Created($"/bookings/{booking.BookingId}", booking);
-        })
-        .RequireAuthorization(CanBookPolicy);
+        });
 
         group.MapGet("/{bookingId:guid}", async (
             Guid bookingId,
@@ -57,8 +55,7 @@ public static class BookingEndpoints
         {
             var booking = await handler.HandleAsync(bookingId, user.GetUserId(), ct);
             return Results.Ok(booking);
-        })
-        .RequireAuthorization(CanBookPolicy);
+        });
 
         return app;
     }

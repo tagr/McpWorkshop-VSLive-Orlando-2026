@@ -7,7 +7,6 @@ using Moq;
 using TravelBooking.Domain.Services;
 using TravelBooking.MCP.Prompts;
 using TravelBooking.MCP.Resources;
-using TravelBooking.MCP.Tools;
 using TravelBooking.Tests.TestHelpers;
 
 namespace TravelBooking.Tests.Mcp;
@@ -138,49 +137,5 @@ public class McpServerPrimitivesTests
 
         tools.Select(t => t.Name).Should().BeEquivalentTo(
             "SearchFlights", "GetFlightDetails", "HoldSeat", "ConfirmBooking", "GetBooking", "CancelBooking");
-    }
-
-    [Fact]
-    public void BaggagePolicyResource_requires_an_authenticated_caller()
-    {
-        var resource = McpServerResource.Create(
-            typeof(BaggagePolicyResource).GetMethod(nameof(BaggagePolicyResource.Read))!, target: null);
-
-        resource.Metadata.OfType<AuthorizeAttribute>().Should().ContainSingle()
-            .Which.Policy.Should().BeNull("reading the policy needs an identity, not booking:write");
-    }
-
-    [Fact]
-    public void BookFlightPrompt_requires_an_authenticated_caller()
-    {
-        var prompt = McpServerPrompt.Create(
-            typeof(BookFlightPrompt).GetMethod(nameof(BookFlightPrompt.Create))!, target: null);
-
-        prompt.Metadata.OfType<AuthorizeAttribute>().Should().ContainSingle()
-            .Which.Policy.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData(typeof(FlightTools), nameof(FlightTools.SearchFlightsAsync))]
-    [InlineData(typeof(FlightTools), nameof(FlightTools.GetFlightDetailsAsync))]
-    [InlineData(typeof(BookingTools), nameof(BookingTools.GetBookingAsync))]
-    public void Read_only_tools_require_an_authenticated_caller(Type toolType, string method)
-    {
-        var tool = McpServerTool.Create(toolType.GetMethod(method)!, _ => throw new InvalidOperationException("not invoked"));
-
-        tool.Metadata.OfType<AuthorizeAttribute>().Should().ContainSingle()
-            .Which.Policy.Should().BeNull("searching and reading need an identity, not booking:write");
-    }
-
-    [Theory]
-    [InlineData(nameof(BookingTools.HoldSeatAsync))]
-    [InlineData(nameof(BookingTools.ConfirmBookingAsync))]
-    [InlineData(nameof(BookingTools.CancelBookingAsync))]
-    public void Tools_that_change_state_also_require_the_booking_scope(string method)
-    {
-        var tool = McpServerTool.Create(typeof(BookingTools).GetMethod(method)!, _ => throw new InvalidOperationException("not invoked"));
-
-        tool.Metadata.OfType<AuthorizeAttribute>().Select(a => a.Policy)
-            .Should().BeEquivalentTo(new string?[] { null, "CanBook" }, "the class demands an identity and the method adds booking:write");
     }
 }

@@ -34,9 +34,7 @@ var travelBookingDb = postgres.AddDatabase("travelbookingdb");
 // world it is describing (`aspire run` versus `azd up`), so it decides here, once.
 var publishedScheme = builder.ExecutionContext.IsPublishMode ? "https" : "http";
 
-var identityServer = builder
-    .AddProject<Projects.TravelBooking_IdentityServer>("identity-server")
-    .WithExternalHttpEndpoints();
+var identityServer = builder.AddProject<Projects.TravelBooking_IdentityServer>("identity-server");
 
 // Tell IdentityServer the origin it is published on, which it cannot work out for itself:
 // Aspire proxies project endpoints, so the process binds a port Aspire picked while the browser
@@ -58,7 +56,6 @@ identityServer.WithEnvironment("IdentityServer__PublicOrigin", identityServerUrl
 var useIdentityServer = builder.Configuration.GetValue("UseIdentityServer", false);
 
 var travelBookingHost = builder.AddProject<Projects.TravelBooking_Host>("travelbooking-host")
-    .WithExternalHttpEndpoints()
     .WithReference(travelBookingDb)
     .WaitFor(travelBookingDb)
     .WaitFor(identityServer)

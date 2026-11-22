@@ -261,39 +261,4 @@ public class BookingServiceTests
 
         await act.Should().ThrowAsync<BookingDomainException>().WithMessage("*departed*");
     }
-
-    [Fact]
-    public async Task HoldSeat_returns_same_hold_when_same_user_retries()
-    {
-        var (svc, _, _, flight) = Setup();
-
-        var first = await svc.HoldSeatAsync(flight.Id, "1A", userId: "user-42", CancellationToken.None);
-        var retry = await svc.HoldSeatAsync(flight.Id, "1A", userId: "user-42", CancellationToken.None);
-
-        retry.Id.Should().Be(first.Id);
-    }
-
-    [Fact]
-    public async Task HoldSeat_still_rejects_different_user_for_held_seat()
-    {
-        var (svc, _, _, flight) = Setup();
-
-        await svc.HoldSeatAsync(flight.Id, "1A", userId: "user-42", CancellationToken.None);
-        var act = async () => await svc.HoldSeatAsync(flight.Id, "1A", userId: "user-43", CancellationToken.None);
-
-        await act.Should().ThrowAsync<BookingDomainException>();
-    }
-
-    [Fact]
-    public async Task ConfirmBooking_returns_same_booking_when_retried()
-    {
-        var (svc, _, _, flight) = Setup();
-        var hold = await svc.HoldSeatAsync(flight.Id, "1A", userId: null, CancellationToken.None);
-
-        var first = await svc.ConfirmBookingAsync(hold.Id, userId: null, CancellationToken.None);
-        var retry = await svc.ConfirmBookingAsync(hold.Id, userId: null, CancellationToken.None);
-
-        retry.Id.Should().Be(first.Id);
-        retry.BookingReference.Should().Be(first.BookingReference);
-    }
 }

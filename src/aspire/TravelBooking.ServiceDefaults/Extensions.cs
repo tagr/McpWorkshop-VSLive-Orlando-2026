@@ -59,14 +59,11 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation()
-                    .AddMeter("TravelBooking.Mcp");
+                    .AddRuntimeInstrumentation();
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddSource("TravelBooking.Mcp")
-                    .AddSource("Experimental.ModelContextProtocol")
                     .AddAspNetCoreInstrumentation(tracing =>
                         // Exclude health check requests from tracing
                         tracing.Filter = context =>
@@ -139,23 +136,23 @@ public static class Extensions
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        // Health endpoints are deliberately exposed in all environments for this workshop:
-        // Azure Container Apps uses them as liveness/readiness probes. In a real system,
-        // consider exposing them on an internal port or protecting them — see
-        // https://aka.ms/dotnet/aspire/healthchecks for the trade-offs.
-
-        // All health checks must pass for app to be considered ready to accept traffic after starting
-        app.MapHealthChecks(HealthEndpointPath, new HealthCheckOptions
+        // Adding health checks endpoints to applications in non-development environments has security implications.
+        // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
+        if (app.Environment.IsDevelopment())
         {
-            ResponseWriter = WriteHealthStatus
-        });
+            // All health checks must pass for app to be considered ready to accept traffic after starting
+            app.MapHealthChecks(HealthEndpointPath, new HealthCheckOptions
+            {
+                ResponseWriter = WriteHealthStatus
+            });
 
-        // Only health checks tagged with the "live" tag must pass for app to be considered alive
-        app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
-        {
-            Predicate = r => r.Tags.Contains("live"),
-            ResponseWriter = WriteHealthStatus
-        });
+            // Only health checks tagged with the "live" tag must pass for app to be considered alive
+            app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+            {
+                Predicate = r => r.Tags.Contains("live"),
+                ResponseWriter = WriteHealthStatus
+            });
+        }
 
         return app;
     }
